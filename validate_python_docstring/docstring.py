@@ -1,5 +1,6 @@
 """Module providing the abstract implementation of a Python docstring."""
 from typing import List, Optional
+from .utils import check_for_common_errors
 from .docstring_argument import DocstringArgument
 from .docstring_section import DocstringSection
 
@@ -14,7 +15,17 @@ class Docstring:
         -----------------------------
         raw: str
             The raw version of the docstring.
+
+        Raises
+        -----------------------------
+        ValueError
+            If the given docstring raw is empty.
         """
+        if len(raw) == 0:
+            raise ValueError(
+                "The given docstring is empty!"
+            )
+        check_for_common_errors(raw)
         self._raw: str = raw
         self._brief_description: str = self._parse_brief_description()
         self._arguments = self._parse_arguments()
