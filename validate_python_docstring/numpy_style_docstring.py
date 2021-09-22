@@ -3,7 +3,7 @@ from typing import List, Optional
 from .docstring import Docstring
 from .docstring_argument import DocstringArgument
 from .docstring_section import DocstringSection
-from .utils import count_left_tabs
+from .utils import count_left_spacers
 
 
 class NumpyStyleDocstring(Docstring):
@@ -50,12 +50,12 @@ class NumpyStyleDocstring(Docstring):
         lines_iterator = iter(self._raw.split("\n"))
         for line in lines_iterator:
             if line.strip() != "Parameters":
-                expected_number_of_tabs = count_left_tabs(line)
                 continue
             else:
                 break
 
-        _ = next(lines_iterator)
+        frame_line = next(lines_iterator)
+        expected_number_of_spacers = count_left_spacers(frame_line)
         arguments = []
         current_argument_name = None
         current_argument_type = None
@@ -65,8 +65,8 @@ class NumpyStyleDocstring(Docstring):
             if line.strip() == "":
                 # We have finished the section
                 break
-            tabs_in_line = count_left_tabs(line)
-            if tabs_in_line == expected_number_of_tabs and ": " in line:
+            spacers_in_line = count_left_spacers(line)
+            if spacers_in_line == expected_number_of_spacers and ": " in line:
                 # This is an argument to be parsed.
                 if current_argument_name is not None:
                     arguments.append(DocstringArgument(
@@ -86,7 +86,7 @@ class NumpyStyleDocstring(Docstring):
                         " = ")
                     current_argument_default_value = current_argument_default_value.strip()
                 current_argument_type = current_argument_type.strip()
-            elif tabs_in_line == expected_number_of_tabs + 1 and current_argument_name is not None:
+            elif spacers_in_line > expected_number_of_spacers and current_argument_name is not None:
                 # This is part of the description of the last argument.
                 if current_argument_description is None:
                     current_argument_description = line.strip()
@@ -97,9 +97,16 @@ class NumpyStyleDocstring(Docstring):
                 raise ValueError(
                     (
                         "An error was encountered while trying to parse the "
-                        "the following docstring arguments:\n {}"
+                        "the following docstring arguments:\n {}\n"
+                        "Specifically the line causing the class is: `{}`.\n"
+                        "The number of spacers found in the line is {} and "
+                        "the number of spacers representing the depth of "
+                        "the section is {}."
                     ).format(
-                        self._raw
+                        self._raw,
+                        line,
+                        spacers_in_line,
+                        expected_number_of_spacers
                     )
                 )
         return arguments
@@ -145,7 +152,7 @@ class NumpyStyleDocstring(Docstring):
         lines_iterator = iter(self._raw.split("\n"))
         for line in lines_iterator:
             if line.strip() != "Returns":
-                expected_number_of_tabs = count_left_tabs(line)
+                expected_number_of_spacers = count_left_spacers(line)
                 continue
             else:
                 break
