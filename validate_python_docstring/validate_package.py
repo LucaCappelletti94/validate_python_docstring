@@ -9,7 +9,8 @@ def validate_function(function, verbose: bool = False, depth: int = 0):
     """Execute validation of the provided function."""
     if verbose:
         print("{}Validating {}".format("\t"*depth, function))
-    NumpyStyleDocstring(function.__doc__)
+    docstring = NumpyStyleDocstring(function.__doc__)
+    print(docstring)
 
 
 def validate_class(klass, verbose: bool = False):
@@ -22,7 +23,11 @@ def validate_class(klass, verbose: bool = False):
             inspect.ismethod(getattr(klass, object_to_validate)) or
             inspect.isfunction(getattr(klass, object_to_validate))
         ):
-            validate_function(object_to_validate, verbose=verbose, depth=1)
+            validate_function(
+                getattr(klass, object_to_validate),
+                verbose=verbose,
+                depth=1
+            )
 
 
 def validate_package(module, verbose: bool = False):

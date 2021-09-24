@@ -59,3 +59,8 @@ class Docstring:
             "The Docstring._parse_return_statement must be implemented "
             "in the child class."
         )
+
+    @property
+    def arguments(self) -> Optional[List[DocstringArgument]]:
+        """Return the arguments of the docstring."""
+        return self._arguments
